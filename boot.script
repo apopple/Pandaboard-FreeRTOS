@@ -1,0 +1,3 @@
+fatload mmc 0 0x82000000 loader.img
+fatload mmc 0 0x84000000 Demo.bin
+bootm 0x82000000

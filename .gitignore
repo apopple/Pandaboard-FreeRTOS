@@ -1,0 +1,5 @@
+*~
+Build/
+*.out
+*.img
+*.bin

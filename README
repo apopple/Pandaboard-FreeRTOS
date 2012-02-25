@@ -1,0 +1,30 @@
+-----------
+DESCRIPTION
+-----------
+
+This demo builds an application and the FreeRTOS (http://www.freertos.org/) kernel for the Cortex-M3 processors
+on the Pandaboard. The demo application will simply flash led D2.
+
+------------
+HOW IT WORKS
+------------
+
+The application and kernel are linked into a single file - Demo.bin. This file is loaded by U-Boot into
+memory and a loader application is run on the MPU (Cortex-A9). The loader application sets up the L2 MMU
+for the Cortex-M3 to map the load address of Demo.bin to the Cortex-M3 virtual address 0x0. The GPIO1 addresses
+are also mapped into the Cortex-M3 virtual address space to allow the demo to flash the led. The loader then
+releases the Cortex-M3 from reset at which point it should boot the application.
+
+--------
+BUILDING
+--------
+
+Simply run make - everything should build assuming mkimage and an appropriate cross-compiler are installed.
+
+-------
+RUNNING
+-------
+
+Copy boot.scr, loader.img and Demo.bin to an SD card with U-boot and X-loader already installed.  Insert the
+SD card into the Pandaboard and reboot - U-boot should run the boot.scr automatically and boot the FreeRTOS
+kernel on the first Cortex-M3 processor which will continuously flash led D2.
