@@ -4,3 +4,9 @@ Build/
 *.img
 *.bin
 *.scr
+modules.order
+Module.symvers
+*.ko
+*.mod.c
+*.o
+.*

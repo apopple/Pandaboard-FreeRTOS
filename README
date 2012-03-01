@@ -5,6 +5,10 @@ DESCRIPTION
 This demo builds an application and the FreeRTOS (http://www.freertos.org/) kernel for the Cortex-M3 processors
 on the Pandaboard. The demo application will simply flash led D2.
 
+The demo can either be run directly by u-boot or loaded using the Linux remoteproc framework found at
+git://git.kernel.org/pub/scm/linux/kernel/git/ohad/remoteproc.git.  The demo was tested against the rpmsg_3.2_rc4
+branch of remoteproc.
+
 ------------
 HOW IT WORKS
 ------------
@@ -21,10 +25,33 @@ BUILDING
 
 Simply run make - everything should build assuming mkimage and an appropriate cross-compiler are installed.
 
+If using the Linux remoteproc framework to load the firmware you will also need to build the kernel module located
+under the KernelModule directory.  This module simply powers up the processor once the firmware is loaded (as
+there does not appear to be a userspace interface to do this yet).
+
 -------
 RUNNING
 -------
 
+* If running directly from u-boot:
+
 Copy boot.scr, loader.img and Demo.bin to an SD card with U-boot and X-loader already installed.  Insert the
 SD card into the Pandaboard and reboot - U-boot should run the boot.scr automatically and boot the FreeRTOS
 kernel on the first Cortex-M3 processor which will continuously flash led D2.
+
+* If using the Linux remoteproc framework:
+
+Make sure the kernel you're using uses the same remoteproc version as in the branch listed above.  Otherwise
+you may have to update the resources table structure (found in Application/startup.c) to match the version
+you are using.  To run the demo:
+
+Copy Demo.out to /lib/firmware/ducati-m3-core0.xem3 on the root filesystem and reboot.
+Load the kernel module (insmod rproc.ko) to start the Cortex-M3 processor - you should get output similar to
+the following and the light should be flashing:
+
+[   41.406219] rproc: module license 'Dual DSD/GPL' taints kernel.
+[   41.412750] Booting processor
+[   41.415893] omap-rproc omap-rproc.1: powering up ipu_c0
+[   41.426269] omap-rproc omap-rproc.1: Booting fw image ducati-m3-core0.xem3, size 76605
+[   41.434692] omap-iommu omap-iommu.0: ducati: version 2.1
+[   41.443786] omap-rproc omap-rproc.1: remote processor ipu_c0 is now up
