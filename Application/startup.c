@@ -25,15 +25,36 @@ typedef uint32_t u32;
 typedef uint64_t u64;
 typedef uint8_t u8;
 
-struct fw_resource {
-	u32 type;
-	u32 id;
-	u64 da;
-	u64 pa;
-	u32 len;
-	u32 flags;
-	u8 reserved[16];
-	u8 name[48];
+#define __packed __attribute__ ((packed))
+
+struct resource_table {
+  u32 ver;
+  u32 num;
+  u32 reserved[2];
+  u32 offset[0];
+} __packed;
+
+struct fw_rsc_hdr {
+  u32 type;
+  u8 data[0];
+} __packed;
+
+struct fw_rsc_carveout {
+  u32 da;
+  u32 pa;
+  u32 len;
+  u32 flags;
+  u32 reserved;
+  u8 name[32];
+} __packed;
+
+struct fw_rsc_devmem {
+  u32 da;
+  u32 pa;
+  u32 len;
+  u32 flags;
+  u32 reserved;
+  u8 name[32];
 } __packed;
 
 enum fw_resource_type {
@@ -47,21 +68,42 @@ enum fw_resource_type {
 
 /* --------------------------------------------------------- */
 
-#define RESERVED {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-
 /* Describe the resources required by this firmware image.  Currently
    we simply map 1M of pyhsical memory from PA 0xb0000000 to the device
    address 0x0 to hold our text/data sections.  We also map a 1M block
    containing the GPIO1 perihperal registers (PA 0x4a300000) to a device
    address 0xfff00000 so we can flash a LED. */
+
+/* The GCC compiler/linker seems to arrange items allocated in the same section in
+   reverse order. However I am not sure if this behaviour is well defined so the code
+   for the resource tables could break if this behaviour isn't well defined. */
 __attribute__ ((section(".resource_table")))
-struct fw_resource resources[] = {
-  { RSC_CARVEOUT, 0, 0, 0xb0000000, 0x100000, 0x0, RESERVED, "text" },
-  { RSC_DEVMEM, 1, 0xfff00000, 0x4a300000, 0x100000, 0x0, RESERVED, "gpio1" },
+struct fw_rsc_devmem devmem_data = {
+  0xfff00000, 0x4a300000, 0x100000, 0x0, 0, "gpio1"
 };
 
-__attribute__ ((section(".resource_size")))
-uint32_t resourcesLen = sizeof(resources)/sizeof(*resources);
+__attribute__ ((section(".resource_table")))
+struct fw_rsc_hdr devmem = {
+  RSC_DEVMEM,
+};
+
+__attribute__ ((section(".resource_table")))
+struct fw_rsc_carveout carve_out_data = {
+  0, 0xb0000000, 0x100000, 0x0, 0, "text"
+};
+
+__attribute__ ((section(".resource_table")))
+struct fw_rsc_hdr carve_out = {
+  RSC_CARVEOUT,
+};
+
+__attribute__ ((section(".resource_table")))
+u32 offset[] = {sizeof(struct resource_table) + 2*sizeof(u32), sizeof(struct resource_table) + 2*sizeof(u32) + sizeof(struct fw_rsc_hdr) + sizeof(struct fw_rsc_carveout)};
+
+__attribute__ ((section(".resource_table")))
+struct resource_table resources = {
+  1, 2, {0}
+};
 
 __attribute__ ((section(".isr_vector")))
 void (* const Vectors[])(void) =
