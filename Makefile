@@ -9,7 +9,7 @@ OBJCOPY = $(CROSS_COMPILE)objcopy
 MKIMAGE=mkimage
 IMAGE_LOADADDR=0x83000000
 
-CFLAGS = -g -mcpu=cortex-m3 -mthumb -I$(APPLICATION_SOURCE_DIR) -I$(FREERTOS_SOURCE_DIR)/Source/include -I$(FREERTOS_SOURCE_DIR)/Source/portable/GCC/ARM_CM3 -D GCC_ARMCM -O2
+CFLAGS = -g -mcpu=cortex-m3 -mthumb -I$(APPLICATION_SOURCE_DIR) -I$(FREERTOS_SOURCE_DIR)/Source/include -I$(FREERTOS_SOURCE_DIR)/Source/portable/GCC/ARM_CM3 -D GCC_ARMCM -O2 -Wall
 LDFLAGS = -Tcortex-m3.lds
 LIBGCC=$(shell $(CC) -mthumb -mcpu=cortex-m3 -print-libgcc-file-name)
 LIBC=$(shell $(CC) -mthumb -mcpu=cortex-m3 -print-file-name=libc.a)
