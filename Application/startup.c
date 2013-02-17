@@ -74,35 +74,24 @@ enum fw_resource_type {
    containing the GPIO1 perihperal registers (PA 0x4a300000) to a device
    address 0xfff00000 so we can flash a LED. */
 
-/* The GCC compiler/linker seems to arrange items allocated in the same section in
-   reverse order. However I am not sure if this behaviour is well defined so the code
-   for the resource tables could break if this behaviour isn't well defined. */
-__attribute__ ((section(".resource_table")))
-struct fw_rsc_devmem devmem_data = {
-  0xfff00000, 0x4a300000, 0x100000, 0x0, 0, "gpio1"
-};
+struct resources {
+  struct resource_table resource_table;
+  u32 offset[2];
+  struct fw_rsc_hdr carve_out;
+  struct fw_rsc_carveout carve_out_data;
+  struct fw_rsc_hdr devmem;
+  struct fw_rsc_devmem devmem_data;
+
+} __packed;
 
 __attribute__ ((section(".resource_table")))
-struct fw_rsc_hdr devmem = {
-  RSC_DEVMEM,
-};
-
-__attribute__ ((section(".resource_table")))
-struct fw_rsc_carveout carve_out_data = {
-  0, 0xb0000000, 0x100000, 0x0, 0, "text"
-};
-
-__attribute__ ((section(".resource_table")))
-struct fw_rsc_hdr carve_out = {
-  RSC_CARVEOUT,
-};
-
-__attribute__ ((section(".resource_table")))
-u32 offset[] = {sizeof(struct resource_table) + 2*sizeof(u32), sizeof(struct resource_table) + 2*sizeof(u32) + sizeof(struct fw_rsc_hdr) + sizeof(struct fw_rsc_carveout)};
-
-__attribute__ ((section(".resource_table")))
-struct resource_table resources = {
-  1, 2, {0}
+struct resources resources = {
+  .resource_table = {1, 2, {0}},
+  .offset = {sizeof(struct resource_table) + 2*sizeof(u32), sizeof(struct resource_table) + 2*sizeof(u32) + sizeof(struct fw_rsc_hdr) + sizeof(struct fw_rsc_carveout)},
+  .carve_out = {RSC_CARVEOUT},
+  .carve_out_data = {0, 0xb0000000, 0x100000, 0x0, 0, "text"},
+  .devmem = {RSC_DEVMEM},
+  .devmem_data = {0xfff00000, 0x4a300000, 0x100000, 0x0, 0, "gpio1"},
 };
 
 __attribute__ ((section(".isr_vector")))
